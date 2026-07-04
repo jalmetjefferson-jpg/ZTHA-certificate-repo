@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ZTHA Certificate Generator — Admin</title>
+<style>
+  :root {
+    --green: #153B2E; --green-dark: #0d271e; --gold: #F2AF19;
+    --cream: #FBF7EF; --line: #e4ddd0; --ink: #2b2b2b;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--cream); color: var(--ink); }
+  header {
+    background: var(--green); color: #fff; padding: 14px 28px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  header .logo-chip { background: #fff; border-radius: 8px; padding: 5px 10px; display: flex; align-items: center; }
+  header .logo-chip img { height: 22px; display: block; }
+  header h1 { font-size: 17px; font-weight: 600; letter-spacing: .5px; }
+  header .links { margin-left: auto; display: flex; gap: 16px; }
+  header .links a { color: #fff; opacity: .85; font-size: 13px; text-decoration: none; }
+  header .links a:hover { opacity: 1; text-decoration: underline; }
+  main { display: grid; grid-template-columns: 380px 1fr; gap: 22px; padding: 22px 28px; max-width: 1500px; margin: 0 auto; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--green); margin-bottom: 14px; }
+  label { display: block; font-size: 12px; font-weight: 600; margin: 10px 0 4px; color: #555; }
+  input[type=text], input[type=number] {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px;
+    font-size: 14px; background: #fffdf9;
+  }
+  input:focus { outline: 2px solid var(--gold); border-color: transparent; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .drop {
+    border: 2px dashed var(--line); border-radius: 10px; padding: 22px; text-align: center;
+    color: #777; font-size: 13px; cursor: pointer; transition: .15s;
+  }
+  .drop:hover, .drop.over { border-color: var(--gold); background: #fffbf2; }
+  .drop b { color: var(--green); }
+  button {
+    border: 0; border-radius: 8px; padding: 11px 18px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: .15s;
+  }
+  .btn-primary { background: var(--green); color: #fff; width: 100%; margin-top: 14px; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-primary:disabled { background: #9db3aa; cursor: not-allowed; }
+  .btn-gold { background: var(--gold); color: var(--green); }
+  .btn-ghost { background: transparent; color: var(--green); border: 1px solid var(--line); }
+  .students { max-height: 210px; overflow-y: auto; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; margin-top: 10px; }
+  .students div { padding: 5px 10px; border-bottom: 1px solid #f2ede2; display: flex; gap: 8px; }
+  .students div:last-child { border-bottom: 0; }
+  .students .n { color: #999; width: 26px; flex: none; }
+  .students .email { color: #888; font-size: 11.5px; }
+  .students .cid { margin-left: auto; color: var(--green); font-family: Consolas, monospace; font-size: 12px; }
+  .skips { background: #fff6e8; border: 1px solid #f0d9a8; border-radius: 8px;
+    padding: 8px 12px; font-size: 12.5px; color: #8a6d1d; margin-top: 10px; }
+  .preview-wrap { position: sticky; top: 20px; }
+  .preview-box { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .preview-box img { width: 100%; border-radius: 6px; box-shadow: 0 8px 30px rgba(21,59,46,.14); min-height: 120px; background: #f6f1e7; }
+  .preview-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .preview-head h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--green); margin-right: auto; }
+  select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; font-size: 13px; background: #fffdf9; max-width: 260px; }
+  .results { margin-top: 16px; }
+  .results table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .results th { text-align: left; color: var(--green); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 1px; padding: 6px 8px; border-bottom: 2px solid var(--line); }
+  .results td { padding: 6px 8px; border-bottom: 1px solid #f2ede2; }
+  .results a { color: var(--green); }
+  .status { font-size: 13px; margin-top: 10px; color: #666; min-height: 18px; }
+  .ok { color: #1c7a44; font-weight: 600; }
+  .err { color: #b54040; font-weight: 600; }
+  .muted { color: #999; font-size: 12px; margin-top: 6px; }
+  .dl-row { display: flex; gap: 10px; margin-top: 12px; }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; font-size: 12.5px; color: var(--green); font-weight: 600; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } .preview-wrap { position: static; } }
+</style>
+</head>
+<body>
+<header>
+  <span class="logo-chip"><img src="/static/ztha_logo.png" alt="ZTHA Academy"></span>
+  <h1>Certificate Generator — Admin</h1>
+  <span class="links">
+    <a href="/" target="_blank">Student portal &rarr;</a>
+    <a href="/verify" target="_blank">Verify certificate &rarr;</a>
+    <a href="/admin/logout">Log out</a>
+  </span>
+</header>
+
+<main>
+  <!-- LEFT: controls -->
+  <section>
+    <div class="card">
+      <h2>1 &middot; Students CSV</h2>
+      <div class="drop" id="drop">
+        <b>Click to choose</b> or drag your CSV here<br>
+        <span class="muted">three columns: student name, email, certificate ID</span>
+        <input type="file" id="file" accept=".csv" hidden>
+      </div>
+      <div class="muted">The email column is required — it's how students find their certificate on the portal.</div>
+      <div id="csvinfo" class="muted">Loading&hellip;</div>
+      <div class="students" id="students" style="display:none"></div>
+      <div class="skips" id="skips" style="display:none"></div>
+    </div>
+
+    <div class="card">
+      <h2>2 &middot; Batch details (entered manually)</h2>
+      <div class="row2">
+        <div><label>Batch</label><input type="text" id="batch"></div>
+        <div><label>Year</label><input type="text" id="year"></div>
+      </div>
+      <label>Issue date (exactly as it should print)</label>
+      <input type="text" id="issue_date">
+      <label>Public link (used by the QR code + verification codes)</label>
+      <input type="text" id="verify_base_url" placeholder="leave blank to auto-use this browser's address">
+      <div class="muted">Blank = auto-detects the address you're viewing this page from right now (works for both localhost and a shared/tunnel link). Only set this if you're deploying to a fixed domain later.</div>
+      <details>
+        <summary>Fine-tune name placement</summary>
+        <div class="row3">
+          <div><label>Max font size</label><input type="number" id="name_font_size"></div>
+          <div><label>Max width px</label><input type="number" id="name_max_width"></div>
+          <div><label>Center Y px</label><input type="number" id="name_center_y"></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>3 &middot; Generate</h2>
+      <button class="btn-primary" id="go" disabled>Generate all certificates</button>
+      <div class="status" id="status"></div>
+      <div class="dl-row" id="dls" style="display:none">
+        <button class="btn-gold" onclick="location='/admin/download-zip'">Download ZIP</button>
+        <button class="btn-ghost" onclick="location='/admin/log.csv'">Download log CSV</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Danger zone</h2>
+      <p class="muted">If a certificate ID or email gets rejected as "already issued" from old test data or a mistaken run, reset here. This archives the current register to a timestamped backup file (nothing is silently deleted) and clears all generated certificate images so you can start completely fresh. It does not touch the CSV you've uploaded.</p>
+      <button class="btn-ghost" id="resetBtn" style="border-color:#eab9b9;color:#b54040;margin-top:10px">Reset all issued certificates</button>
+      <div class="status" id="resetStatus"></div>
+    </div>
+  </section>
+
+  <!-- RIGHT: live preview + results -->
+  <section class="preview-wrap">
+    <div class="preview-box">
+      <div class="preview-head">
+        <h2>Live preview</h2>
+        <select id="pvname"></select>
+        <button class="btn-ghost" id="refresh">Refresh</button>
+      </div>
+      <img id="pv" src="" alt="certificate preview">
+      <div class="muted">Preview updates as you edit the fields on the left.</div>
+    </div>
+    <div class="results card" id="results" style="display:none">
+      <h2>Generated</h2>
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Certificate ID</th><th>Verify code</th><th>File</th><th>Print file</th></tr></thead>
+        <tbody id="logbody"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+const F = ["batch","year","issue_date","verify_base_url","name_font_size","name_max_width","name_center_y"];
+const $ = id => document.getElementById(id);
+let STUDENTS = [];
+
+function settings() {
+  const o = {};
+  F.forEach(k => o[k] = $(k).value);
+  return o;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function showStudents(students, skipped) {
+  STUDENTS = students;
+  const list = $("students");
+  if (students.length) {
+    list.innerHTML = students.map((s, i) =>
+      `<div><span class="n">${i+1}</span><span>${esc(s.name)}<br><span class="email">${esc(s.email || "")}</span></span>` +
+      (s.cert_id ? `<span class="cid">${esc(s.cert_id)}</span>` : "") + `</div>`).join("");
+    list.style.display = "";
+    $("csvinfo").textContent = "Loaded: " + students.length + " students";
+  } else {
+    list.style.display = "none";
+    $("csvinfo").textContent = "No CSV loaded yet";
+  }
+  const sk = $("skips");
+  if (skipped && skipped.length) { sk.innerHTML = skipped.map(esc).join("<br>"); sk.style.display = ""; }
+  else sk.style.display = "none";
+  const sel = $("pvname");
+  sel.innerHTML = students.length
+    ? students.map((s, i) => `<option value="${i}">${esc(s.name)}</option>`).join("")
+    : `<option value="-1">Sample: Adaeze Chukwuemeka Okonkwo</option>`;
+  $("go").disabled = students.length === 0;
+}
+
+let t;
+function refreshPreview() {
+  clearTimeout(t);
+  t = setTimeout(() => {
+    const p = new URLSearchParams(settings());
+    const idx = parseInt($("pvname").value, 10);
+    if (idx >= 0 && STUDENTS[idx]) {
+      p.set("preview_name", STUDENTS[idx].name);
+      if (STUDENTS[idx].cert_id) p.set("preview_cert_id", STUDENTS[idx].cert_id);
+    }
+    $("pv").src = "/admin/preview?" + p.toString() + "&_=" + Date.now();
+  }, 400);
+}
+F.forEach(k => $(k).addEventListener("input", refreshPreview));
+$("pvname").addEventListener("change", refreshPreview);
+$("refresh").addEventListener("click", refreshPreview);
+
+// ---- state loading (initial load + after a reset) ----
+async function loadState() {
+  const r = await fetch("/admin/state");
+  const j = await r.json();
+  F.forEach(k => { if (j.settings[k] !== undefined) $(k).value = j.settings[k]; });
+  $("csvinfo").innerHTML = j.csv_error ? '<span class="err">' + esc(j.csv_error) + '</span>' : "";
+  showStudents(j.students, j.skipped);
+  refreshPreview();
+}
+loadState();
+
+// ---- CSV upload ----
+const drop = $("drop"), file = $("file");
+drop.addEventListener("click", () => file.click());
+["dragover","dragenter"].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", ev => { if (ev.dataTransfer.files.length) sendCSV(ev.dataTransfer.files[0]); });
+file.addEventListener("change", () => { if (file.files.length) sendCSV(file.files[0]); });
+
+async function sendCSV(f) {
+  const fd = new FormData();
+  fd.append("csv", f);
+  $("csvinfo").textContent = "Uploading " + f.name + "…";
+  const r = await fetch("/admin/upload", { method: "POST", body: fd });
+  const j = await r.json();
+  if (!r.ok) { $("csvinfo").innerHTML = '<span class="err">' + esc(j.error) + '</span>'; return; }
+  showStudents(j.students, j.skipped);
+  $("csvinfo").textContent = "Loaded: " + j.students.length + " students (" + f.name + ")";
+  refreshPreview();
+}
+
+// ---- generate ----
+$("go").addEventListener("click", async () => {
+  const btn = $("go");
+  btn.disabled = true;
+  $("status").textContent = "Rendering… this can take a moment for large batches.";
+  try {
+    const r = await fetch("/admin/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(settings()),
+    });
+    const j = await r.json();
+    if (!r.ok) { $("status").innerHTML = '<span class="err">' + esc(j.error) + '</span>'; return; }
+    $("status").innerHTML = '<span class="ok">Done — ' + j.count + ' certificates generated.</span>' +
+      (j.skipped.length ? '<br>Skipped: ' + j.skipped.map(esc).join("; ") : "");
+    $("dls").style.display = "";
+    $("logbody").innerHTML = j.log.map((row, i) =>
+      `<tr><td>${i+1}</td><td>${esc(row.full_name)}</td><td>${esc(row.certificate_id)}</td>
+       <td>${esc(row.verification_code)}</td>
+       <td><a href="/certificates/${encodeURIComponent(row.filename)}" target="_blank">view</a></td>
+       <td>${row.print_filename ? `<a href="/certificates/${encodeURIComponent(row.print_filename)}" target="_blank">view</a>` : "—"}</td></tr>`).join("");
+    $("results").style.display = "";
+  } finally { btn.disabled = false; }
+});
+
+// ---- reset (danger zone) ----
+$("resetBtn").addEventListener("click", async () => {
+  const sure = confirm(
+    "This archives the current certificate register to a timestamped backup file and " +
+    "deletes every generated certificate image. Verification links already handed out " +
+    "will stop working. This cannot be undone from this screen.\n\n" +
+    "Continue?"
+  );
+  if (!sure) return;
+  const btn = $("resetBtn");
+  btn.disabled = true;
+  $("resetStatus").textContent = "Resetting…";
+  try {
+    const r = await fetch("/admin/reset", { method: "POST" });
+    const j = await r.json();
+    $("resetStatus").innerHTML = '<span class="ok">Cleared ' + j.records_cleared +
+      ' record(s) and ' + j.files_removed + ' file(s).</span>' +
+      (j.archived_to ? '<br><span class="muted">Backup saved server-side at ' + esc(j.archived_to) + '</span>' : '');
+    $("results").style.display = "none";
+    $("dls").style.display = "none";
+    await loadState();
+  } finally { btn.disabled = false; }
+});
+</script>
+</body>
+</html>

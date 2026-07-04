@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login — ZTHA Certificate Generator</title>
+<style>
+  :root { --green: #153B2E; --green-dark: #0d271e; --gold: #F2AF19; --cream: #FBF7EF; --line: #e4ddd0; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--cream); color: #2b2b2b;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 32px;
+    width: 100%; max-width: 360px; }
+  .logo { height: 28px; display: block; margin-bottom: 16px; }
+  h2 { font-size: 18px; color: var(--green); margin-bottom: 6px; }
+  p.sub { font-size: 13px; color: #777; margin-bottom: 20px; }
+  label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: #555; }
+  input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; }
+  input:focus { outline: 2px solid var(--gold); border-color: transparent; }
+  button { width: 100%; margin-top: 16px; border: 0; border-radius: 8px; padding: 12px;
+    background: var(--green); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+  button:hover { background: var(--green-dark); }
+  .error { background: #fdeeee; border: 1px solid #eab9b9; color: #b54040; border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; margin-bottom: 14px; }
+  .back { display: block; text-align: center; margin-top: 16px; font-size: 13px; color: var(--green); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="logo" src="/static/ztha_logo.png" alt="ZTHA Academy">
+    <h2>Admin sign-in</h2>
+    <p class="sub">Only staff issuing certificates need to sign in here.</p>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form method="POST">
+      <label>Admin password</label>
+      <input type="password" name="password" autofocus autocomplete="current-password">
+      <button type="submit">Sign in</button>
+    </form>
+    <a class="back" href="/">&larr; Back to student portal</a>
+  </div>
+</body>
+</html>

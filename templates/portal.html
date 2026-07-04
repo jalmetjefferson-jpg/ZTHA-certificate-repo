@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Get Your Certificate — ZTHA Academy</title>
+<style>
+  :root { --green: #153B2E; --green-dark: #0d271e; --gold: #F2AF19; --cream: #FBF7EF; --line: #e4ddd0; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--cream); color: #2b2b2b;
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  header { background: var(--green); color: #fff; padding: 14px 28px; width: 100%;
+    display: flex; align-items: center; gap: 14px; }
+  header .logo-chip { background: #fff; border-radius: 8px; padding: 5px 10px; display: flex; align-items: center; }
+  header .logo-chip img { height: 22px; display: block; }
+  header h1 { font-size: 17px; font-weight: 600; }
+  header a { margin-left: auto; color: #fff; opacity: .85; font-size: 13px; text-decoration: none; }
+  header a:hover { opacity: 1; text-decoration: underline; }
+  main { max-width: 560px; width: 100%; padding: 40px 20px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 28px; }
+  h2 { font-size: 19px; color: var(--green); margin-bottom: 6px; }
+  p.sub { font-size: 13.5px; color: #777; margin-bottom: 20px; }
+  label { display: block; font-size: 12px; font-weight: 600; margin: 14px 0 5px; color: #555; }
+  input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; }
+  input:focus { outline: 2px solid var(--gold); border-color: transparent; }
+  button { width: 100%; margin-top: 18px; border: 0; border-radius: 8px; padding: 12px;
+    background: var(--green); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+  button:hover { background: var(--green-dark); }
+  button:disabled { background: #9db3aa; }
+  .btn-gold { background: var(--gold); color: var(--green); }
+  .btn-ghost { background: transparent; color: var(--green); border: 1px solid var(--line); margin-top: 10px; }
+  .error { background: #fdeeee; border: 1px solid #eab9b9; color: #b54040; border-radius: 8px;
+    padding: 12px 14px; font-size: 13.5px; margin-top: 18px; }
+  .result { margin-top: 22px; display: none; }
+  .result img { width: 100%; border-radius: 8px; box-shadow: 0 8px 30px rgba(21,59,46,.16); border: 1px solid var(--line); }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: 5px 12px; font-size: 13.5px; margin: 16px 0; }
+  dt { color: #666; }
+  dt::after { content: ":"; }
+  .verify-box { margin-top: 14px; padding: 12px 14px; border-radius: 8px; font-size: 13.5px; display: none; }
+  .verify-box.valid { background: #e9f6ee; border: 1px solid #a9d8bb; color: #1c7a44; }
+  .spinner-note { font-size: 12.5px; color: #999; margin-top: 8px; text-align: center; }
+  .muted { font-size: 12px; color: #999; }
+  footer { font-size: 12px; color: #999; margin-top: 22px; text-align: center; max-width: 560px; padding: 0 20px 30px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="logo-chip"><img src="/static/ztha_logo.png" alt="ZTHA Academy"></span>
+  <h1>Certificate Portal</h1>
+  <a href="/verify" target="_blank">Verify certificate &rarr;</a>
+</header>
+<main>
+  <div class="card">
+    <h2>Get your certificate</h2>
+    <p class="sub">Enter the full name and email address ZTHA Academy has on file for you.</p>
+
+    <label>Full name</label>
+    <input type="text" id="name" placeholder="e.g. Adaeze Chukwuemeka Okonkwo" autocomplete="name">
+    <label>Email address</label>
+    <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+    <button id="go">Find my certificate</button>
+    <div class="spinner-note" id="loading" style="display:none">Searching&hellip;</div>
+
+    <div class="error" id="error" style="display:none"></div>
+
+    <div class="result" id="result">
+      <img id="certimg" alt="Your certificate">
+      <dl>
+        <dt>Name</dt><dd id="r_name"></dd>
+        <dt>Certificate ID</dt><dd id="r_id"></dd>
+        <dt>Batch</dt><dd id="r_batch"></dd>
+        <dt>Issued</dt><dd id="r_date"></dd>
+        <dt>Verify code</dt><dd id="r_code"></dd>
+      </dl>
+      <button class="btn-gold" id="download">Download Certificate</button>
+      <button class="btn-ghost" id="downloadPrint" style="display:none">Download Print-Quality Certificate</button>
+      <div class="muted" id="printNote" style="display:none;text-align:center;margin-top:6px">Best for printing &mdash; full resolution, larger file</div>
+      <button class="btn-ghost" id="verifyBtn">Verify authenticity</button>
+      <div class="verify-box" id="verifyBox"></div>
+    </div>
+  </div>
+</main>
+<footer>Having trouble finding your certificate? Contact ZTHA Academy with the name and email used during enrollment.</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+let current = null;
+
+async function search() {
+  const name = $("name").value.trim();
+  const email = $("email").value.trim();
+  $("error").style.display = "none";
+  $("result").style.display = "none";
+  $("verifyBox").style.display = "none";
+  if (!name || !email) {
+    $("error").textContent = "Please enter both your full name and email address.";
+    $("error").style.display = "block";
+    return;
+  }
+  $("go").disabled = true;
+  $("loading").style.display = "block";
+  try {
+    const r = await fetch("/api/lookup?" + new URLSearchParams({ name, email }));
+    const j = await r.json();
+    if (!j.found) {
+      $("error").textContent = j.reason;
+      $("error").style.display = "block";
+      return;
+    }
+    current = j;
+    $("certimg").src = "/certificates/" + encodeURIComponent(j.filename);
+    $("r_name").textContent = j.full_name;
+    $("r_id").textContent = j.certificate_id;
+    $("r_batch").textContent = j.batch + " · Class of " + j.year;
+    $("r_date").textContent = j.issue_date;
+    $("r_code").textContent = j.verification_code;
+    const hasPrint = !!j.print_filename;
+    $("downloadPrint").style.display = hasPrint ? "block" : "none";
+    $("printNote").style.display = hasPrint ? "block" : "none";
+    $("result").style.display = "block";
+  } finally {
+    $("go").disabled = false;
+    $("loading").style.display = "none";
+  }
+}
+
+$("go").addEventListener("click", search);
+[$("name"), $("email")].forEach(el => el.addEventListener("keydown", e => { if (e.key === "Enter") search(); }));
+
+function downloadFile(filename) {
+  const a = document.createElement("a");
+  a.href = "/certificates/" + encodeURIComponent(filename);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+$("download").addEventListener("click", () => { if (current) downloadFile(current.filename); });
+$("downloadPrint").addEventListener("click", () => { if (current && current.print_filename) downloadFile(current.print_filename); });
+
+$("verifyBtn").addEventListener("click", async () => {
+  if (!current) return;
+  const box = $("verifyBox");
+  box.style.display = "block";
+  box.className = "verify-box";
+  box.textContent = "Checking…";
+  const r = await fetch("/api/verify?" + new URLSearchParams({ id: current.certificate_id, code: current.verification_code }));
+  const j = await r.json();
+  if (j.valid) {
+    box.className = "verify-box valid";
+    box.innerHTML = `&#10003; Verified — genuine ZTHA Academy certificate issued to <b>${esc(j.full_name)}</b>, ${esc(j.batch)} &middot; Class of ${esc(j.year)}.`;
+  } else {
+    box.className = "verify-box";
+    box.style.background = "#fdeeee"; box.style.border = "1px solid #eab9b9"; box.style.color = "#b54040";
+    box.textContent = j.reason;
+  }
+});
+</script>
+</body>
+</html>

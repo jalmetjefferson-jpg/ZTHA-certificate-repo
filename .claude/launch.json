@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ztha-cert-app",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["app.py"],
+      "autoPort": true
+    }
+  ]
+}

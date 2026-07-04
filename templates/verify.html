@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Verify a ZTHA Certificate</title>
+<style>
+  :root { --green: #153B2E; --green-dark: #0d271e; --gold: #F2AF19; --cream: #FBF7EF; --line: #e4ddd0; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--cream); color: #2b2b2b;
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  header { background: var(--green); color: #fff; padding: 14px 28px; width: 100%;
+    display: flex; align-items: center; gap: 14px; }
+  header .logo-chip { background: #fff; border-radius: 8px; padding: 5px 10px; display: flex; align-items: center; }
+  header .logo-chip img { height: 22px; display: block; }
+  header h1 { font-size: 17px; font-weight: 600; }
+  main { max-width: 460px; width: 100%; padding: 40px 20px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 28px; }
+  h2 { font-size: 18px; color: var(--green); margin-bottom: 6px; }
+  p.sub { font-size: 13px; color: #777; margin-bottom: 20px; }
+  label { display: block; font-size: 12px; font-weight: 600; margin: 14px 0 5px; color: #555; }
+  input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 14px; font-family: Consolas, monospace; text-transform: uppercase; background: #fffdf9; }
+  input:focus { outline: 2px solid var(--gold); border-color: transparent; }
+  button { width: 100%; margin-top: 18px; border: 0; border-radius: 8px; padding: 12px;
+    background: var(--green); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+  button:hover { background: var(--green-dark); }
+  button:disabled { background: #9db3aa; }
+  .result { margin-top: 20px; padding: 16px; border-radius: 10px; font-size: 14px; display: none; }
+  .result.valid { background: #e9f6ee; border: 1px solid #a9d8bb; }
+  .result.invalid { background: #fdeeee; border: 1px solid #eab9b9; }
+  .result h3 { font-size: 15px; margin-bottom: 8px; }
+  .result.valid h3 { color: #1c7a44; }
+  .result.invalid h3 { color: #b54040; }
+  .result dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
+  .result dt { color: #666; }
+  .result dt::after { content: ":"; }
+  footer { font-size: 12px; color: #999; margin-top: 22px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <span class="logo-chip"><img src="/static/ztha_logo.png" alt="ZTHA Academy"></span>
+  <h1>Certificate Verification</h1>
+</header>
+<main>
+  <div class="card">
+    <h2>Verify a certificate</h2>
+    <p class="sub">Enter the Certificate ID and the short verification code printed at the bottom of the certificate (below the QR code).</p>
+    <label>Certificate ID</label>
+    <input type="text" id="id" placeholder="ZTHA-B5-2026-0001" autocomplete="off">
+    <label>Verification code</label>
+    <input type="text" id="code" placeholder="9F3C-7A1B" autocomplete="off">
+    <button id="go">Check</button>
+    <div class="result" id="result"></div>
+  </div>
+  <footer>Every ZTHA Academy certificate carries a code that is cryptographically tied to its ID and recipient — it cannot be produced without the Academy's private signing key.</footer>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+const params = new URLSearchParams(location.search);
+if (params.get("id")) $("id").value = params.get("id");
+if (params.get("code")) $("code").value = params.get("code");
+
+async function check() {
+  const id = $("id").value.trim();
+  const code = $("code").value.trim();
+  const box = $("result");
+  box.style.display = "none";
+  if (!id || !code) return;
+  $("go").disabled = true;
+  try {
+    const r = await fetch("/api/verify?" + new URLSearchParams({ id, code }));
+    const j = await r.json();
+    box.className = "result " + (j.valid ? "valid" : "invalid");
+    box.innerHTML = j.valid
+      ? `<h3>&#10003; Valid certificate</h3>
+         <dl>
+           <dt>Name</dt><dd>${esc(j.full_name)}</dd>
+           <dt>Certificate ID</dt><dd>${esc(j.certificate_id)}</dd>
+           <dt>Batch</dt><dd>${esc(j.batch)} &middot; Class of ${esc(j.year)}</dd>
+           <dt>Issued</dt><dd>${esc(j.issue_date)}</dd>
+         </dl>`
+      : `<h3>&#10007; Not valid</h3><p>${esc(j.reason)}</p>`;
+    box.style.display = "block";
+  } finally { $("go").disabled = false; }
+}
+$("go").addEventListener("click", check);
+[$("id"), $("code")].forEach(el => el.addEventListener("keydown", e => { if (e.key === "Enter") check(); }));
+if (params.get("id") && params.get("code")) check();
+</script>
+</body>
+</html>
