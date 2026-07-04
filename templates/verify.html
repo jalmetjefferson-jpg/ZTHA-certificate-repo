@@ -4,45 +4,95 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Verify a ZTHA Certificate</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --green: #153B2E; --green-dark: #0d271e; --gold: #F2AF19; --cream: #FBF7EF; --line: #e4ddd0; }
+  :root {
+    --green: #153B2E; --green-deep: #0a1f17; --green-soft: #1f4d3b;
+    --gold: #F2AF19; --gold-light: #FFDD7A; --gold-deep: #C98A0F;
+    --cream: #FBF7EF; --cream-deep: #F2EAD8; --line: #e8e0d0; --ink: #262420;
+    --font-display: 'Cinzel', 'Georgia', serif;
+    --font-body: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  }
   * { box-sizing: border-box; margin: 0; }
   html { -webkit-text-size-adjust: 100%; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--cream); color: #2b2b2b;
-    min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
-  header { background: var(--green); color: #fff; padding: 14px 28px; width: 100%;
-    display: flex; align-items: center; gap: 14px; }
-  header .logo-chip { background: #fff; border-radius: 8px; padding: 5px 10px; display: flex; align-items: center; flex: none; }
+  body {
+    font-family: var(--font-body); color: var(--ink);
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    background-color: var(--cream);
+    background-image:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(242,175,25,.10), transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cpath d='M0 40 Q 55 10 110 40 T 220 40' fill='none' stroke='%23153B2E' stroke-opacity='0.035' stroke-width='2'/%3E%3Cpath d='M0 110 Q 55 80 110 110 T 220 110' fill='none' stroke='%23153B2E' stroke-opacity='0.035' stroke-width='2'/%3E%3Cpath d='M0 180 Q 55 150 110 180 T 220 180' fill='none' stroke='%23153B2E' stroke-opacity='0.035' stroke-width='2'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+  }
+  header {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-soft) 100%);
+    color: #fff; padding: 16px 28px; width: 100%;
+    display: flex; align-items: center; gap: 14px;
+    border-bottom: 3px solid var(--gold); box-shadow: 0 2px 14px rgba(10,31,23,.25);
+  }
+  header .logo-chip { background: #fff; border-radius: 9px; padding: 6px 11px; display: flex; align-items: center; flex: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12); }
   header .logo-chip img { height: 22px; display: block; }
-  header h1 { font-size: 17px; font-weight: 600; }
-  main { max-width: 460px; width: 100%; padding: 40px 20px; }
-  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 28px; }
-  h2 { font-size: 18px; color: var(--green); margin-bottom: 6px; }
-  p.sub { font-size: 13px; color: #777; margin-bottom: 20px; }
-  label { display: block; font-size: 12px; font-weight: 600; margin: 14px 0 5px; color: #555; }
-  input { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 8px;
-    font-size: 16px; font-family: Consolas, monospace; text-transform: uppercase; background: #fffdf9; }
-  input:focus { outline: 2px solid var(--gold); border-color: transparent; }
-  button { width: 100%; margin-top: 18px; border: 0; border-radius: 8px; padding: 14px 12px;
-    background: var(--green); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
-  button:hover { background: var(--green-dark); }
-  button:disabled { background: #9db3aa; }
-  .result { margin-top: 20px; padding: 16px; border-radius: 10px; font-size: 14px; display: none; }
-  .result.valid { background: #e9f6ee; border: 1px solid #a9d8bb; }
-  .result.invalid { background: #fdeeee; border: 1px solid #eab9b9; }
-  .result h3 { font-size: 15px; margin-bottom: 8px; }
+  header h1 { font-family: var(--font-display); font-size: 16px; font-weight: 600; letter-spacing: .5px; }
+  main { max-width: 460px; width: 100%; padding: 48px 20px; }
+  .hero { text-align: center; margin-bottom: 26px; animation: fadeUp .5s ease both; }
+  .hero h2 { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--green); }
+  .hero p { font-size: 13.5px; color: #7a7267; margin-top: 8px; }
+  .ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 14px 0 0; }
+  .ornament::before, .ornament::after { content: ""; height: 1px; width: 56px;
+    background: linear-gradient(90deg, transparent, var(--gold)); }
+  .ornament::after { background: linear-gradient(90deg, var(--gold), transparent); }
+  .ornament span { width: 6px; height: 6px; background: var(--gold); transform: rotate(45deg); flex: none; }
+  .card {
+    background: #fffdf9; border: 1px solid var(--line); border-radius: 18px; padding: 32px;
+    box-shadow: 0 1px 2px rgba(21,59,46,.06), 0 18px 45px -12px rgba(21,59,46,.18);
+    position: relative; overflow: hidden; animation: fadeUp .6s ease both; animation-delay: .05s;
+  }
+  .card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--green), var(--gold), var(--green)); }
+  label { display: block; font-size: 12px; font-weight: 600; margin: 16px 0 6px; color: #6b6459; letter-spacing: .2px; }
+  input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px;
+    font-size: 16px; font-family: Consolas, monospace; text-transform: uppercase; background: #fff; color: var(--ink);
+    transition: border-color .15s, box-shadow .15s; letter-spacing: .5px; }
+  input::placeholder { color: #b5ac9c; }
+  input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(242,175,25,.16); }
+  button { width: 100%; margin-top: 20px; border: 0; border-radius: 10px; padding: 14px 12px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; letter-spacing: .2px;
+    background: linear-gradient(155deg, var(--green) 0%, var(--green-deep) 100%); color: #fff;
+    box-shadow: 0 10px 24px -8px rgba(21,59,46,.55);
+    transition: transform .12s ease, box-shadow .12s ease; }
+  button:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 14px 28px -8px rgba(21,59,46,.6); }
+  button:active { transform: translateY(1px); }
+  button:disabled { background: #c7c0b3; box-shadow: none; cursor: not-allowed; transform: none; }
+  .result { margin-top: 22px; padding: 18px; border-radius: 12px; font-size: 14px; display: none; }
+  .result.show { display: block; animation: fadeUp .35s ease both; }
+  .result.valid { background: linear-gradient(155deg, #eef8f1, #e4f4ea); border: 1px solid #b7e0c4; }
+  .result.invalid { background: #fdf1f1; border: 1px solid #f0c3c3; }
+  .result-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .badge { flex: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; background: #1c7a44; color: #fff; font-size: 16px; }
+  .result.invalid .badge { background: #a83f3f; }
+  .result h3 { font-family: var(--font-display); font-size: 16px; }
   .result.valid h3 { color: #1c7a44; }
-  .result.invalid h3 { color: #b54040; }
-  .result dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
-  .result dt { color: #666; }
+  .result.invalid h3 { color: #a83f3f; }
+  .result dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 13.5px; }
+  .result dt { color: #6b6459; font-weight: 500; }
   .result dt::after { content: ":"; }
-  footer { font-size: 12px; color: #999; margin-top: 22px; text-align: center; }
+  .result dd { font-weight: 600; color: var(--ink); }
+  footer { font-size: 12.5px; color: #93897a; margin-top: 26px; text-align: center; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
   @media (max-width: 480px) {
     header { padding: 12px 16px; }
-    main { padding: 24px 14px; }
-    .card { padding: 20px 18px; }
-    .result dl { grid-template-columns: 1fr; gap: 2px 0; }
-    .result dl dt { margin-top: 6px; }
+    main { padding: 28px 14px; }
+    .hero h2 { font-size: 20px; }
+    .card { padding: 22px 18px; }
+    .result dl { grid-template-columns: 1fr; gap: 3px 0; }
+    .result dl dt { margin-top: 8px; }
   }
 </style>
 </head>
@@ -52,14 +102,17 @@
   <h1>Certificate Verification</h1>
 </header>
 <main>
+  <div class="hero">
+    <h2>Verify a Certificate</h2>
+    <p>Enter the Certificate ID and verification code printed below the QR code.</p>
+    <div class="ornament"><span></span></div>
+  </div>
   <div class="card">
-    <h2>Verify a certificate</h2>
-    <p class="sub">Enter the Certificate ID and the short verification code printed at the bottom of the certificate (below the QR code).</p>
     <label>Certificate ID</label>
     <input type="text" id="id" placeholder="ZTHA-B5-2026-0001" autocomplete="off">
     <label>Verification code</label>
     <input type="text" id="code" placeholder="9F3C-7A1B" autocomplete="off">
-    <button id="go">Check</button>
+    <button id="go">Check Certificate</button>
     <div class="result" id="result"></div>
   </div>
   <footer>Every ZTHA Academy certificate carries a code that is cryptographically tied to its ID and recipient — it cannot be produced without the Academy's private signing key.</footer>
@@ -78,23 +131,22 @@ async function check() {
   const id = $("id").value.trim();
   const code = $("code").value.trim();
   const box = $("result");
-  box.style.display = "none";
+  box.classList.remove("show");
   if (!id || !code) return;
   $("go").disabled = true;
   try {
     const r = await fetch("/api/verify?" + new URLSearchParams({ id, code }));
     const j = await r.json();
-    box.className = "result " + (j.valid ? "valid" : "invalid");
+    box.className = "result show " + (j.valid ? "valid" : "invalid");
     box.innerHTML = j.valid
-      ? `<h3>&#10003; Valid certificate</h3>
+      ? `<div class="result-head"><span class="badge">&#10003;</span><h3>Valid Certificate</h3></div>
          <dl>
            <dt>Name</dt><dd>${esc(j.full_name)}</dd>
            <dt>Certificate ID</dt><dd>${esc(j.certificate_id)}</dd>
            <dt>Batch</dt><dd>${esc(j.batch)} &middot; Class of ${esc(j.year)}</dd>
            <dt>Issued</dt><dd>${esc(j.issue_date)}</dd>
          </dl>`
-      : `<h3>&#10007; Not valid</h3><p>${esc(j.reason)}</p>`;
-    box.style.display = "block";
+      : `<div class="result-head"><span class="badge">&#33;</span><h3>Not Valid</h3></div><p>${esc(j.reason)}</p>`;
   } finally { $("go").disabled = false; }
 }
 $("go").addEventListener("click", check);

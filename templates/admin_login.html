@@ -4,39 +4,69 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin Login — ZTHA Certificate Generator</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --green: #153B2E; --green-dark: #0d271e; --gold: #F2AF19; --cream: #FBF7EF; --line: #e4ddd0; }
+  :root {
+    --green: #153B2E; --green-deep: #0a1f17; --green-soft: #1f4d3b;
+    --gold: #F2AF19; --gold-deep: #C98A0F;
+    --cream: #FBF7EF; --line: #e8e0d0; --ink: #262420;
+    --font-display: 'Cinzel', 'Georgia', serif;
+    --font-body: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  }
   * { box-sizing: border-box; margin: 0; }
   html { -webkit-text-size-adjust: 100%; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--cream); color: #2b2b2b;
-    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 32px;
-    width: 100%; max-width: 360px; }
-  .logo { height: 28px; display: block; margin-bottom: 16px; }
-  h2 { font-size: 18px; color: var(--green); margin-bottom: 6px; }
-  p.sub { font-size: 13px; color: #777; margin-bottom: 20px; }
-  label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: #555; }
-  input { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; }
-  input:focus { outline: 2px solid var(--gold); border-color: transparent; }
-  button { width: 100%; margin-top: 16px; border: 0; border-radius: 8px; padding: 14px 12px;
-    background: var(--green); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
-  button:hover { background: var(--green-dark); }
-  .error { background: #fdeeee; border: 1px solid #eab9b9; color: #b54040; border-radius: 8px;
-    padding: 10px 12px; font-size: 13px; margin-bottom: 14px; }
-  .back { display: block; text-align: center; margin-top: 16px; font-size: 13px; color: var(--green); }
-  @media (max-width: 400px) { .card { padding: 24px 20px; } }
+  body {
+    font-family: var(--font-body); color: var(--ink);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    background-color: var(--cream);
+    background-image:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(242,175,25,.10), transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cpath d='M0 40 Q 55 10 110 40 T 220 40' fill='none' stroke='%23153B2E' stroke-opacity='0.035' stroke-width='2'/%3E%3Cpath d='M0 110 Q 55 80 110 110 T 220 110' fill='none' stroke='%23153B2E' stroke-opacity='0.035' stroke-width='2'/%3E%3Cpath d='M0 180 Q 55 150 110 180 T 220 180' fill='none' stroke='%23153B2E' stroke-opacity='0.035' stroke-width='2'/%3E%3C/svg%3E");
+  }
+  .card {
+    background: #fffdf9; border: 1px solid var(--line); border-radius: 18px; padding: 34px;
+    width: 100%; max-width: 360px; position: relative; overflow: hidden;
+    box-shadow: 0 1px 2px rgba(21,59,46,.06), 0 18px 45px -12px rgba(21,59,46,.2);
+    animation: fadeUp .5s ease both;
+  }
+  .card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--green), var(--gold), var(--green)); }
+  .logo { height: 26px; display: block; margin-bottom: 18px; }
+  h2 { font-family: var(--font-display); font-size: 19px; color: var(--green); margin-bottom: 6px; }
+  p.sub { font-size: 13px; color: #7a7267; margin-bottom: 22px; }
+  label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #6b6459; letter-spacing: .2px; }
+  input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 16px;
+    font-family: var(--font-body); background: #fff; color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+  input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(242,175,25,.16); }
+  button { width: 100%; margin-top: 18px; border: 0; border-radius: 10px; padding: 14px 12px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; letter-spacing: .2px;
+    background: linear-gradient(155deg, var(--green) 0%, var(--green-deep) 100%); color: #fff;
+    box-shadow: 0 10px 24px -8px rgba(21,59,46,.55); transition: transform .12s ease, box-shadow .12s ease; }
+  button:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -8px rgba(21,59,46,.6); }
+  button:active { transform: translateY(1px); }
+  .error { background: #fdf1f1; border: 1px solid #f0c3c3; color: #a83f3f; border-radius: 10px;
+    padding: 11px 14px; font-size: 13px; margin-bottom: 16px; }
+  .back { display: block; text-align: center; margin-top: 18px; font-size: 13px; color: var(--green); text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @media (max-width: 400px) { .card { padding: 26px 22px; } }
 </style>
 </head>
 <body>
   <div class="card">
     <img class="logo" src="/static/ztha_logo.png" alt="ZTHA Academy">
-    <h2>Admin sign-in</h2>
+    <h2>Admin Sign-In</h2>
     <p class="sub">Only staff issuing certificates need to sign in here.</p>
     {% if error %}<div class="error">{{ error }}</div>{% endif %}
     <form method="POST">
       <label>Admin password</label>
       <input type="password" name="password" autofocus autocomplete="current-password">
-      <button type="submit">Sign in</button>
+      <button type="submit">Sign In</button>
     </form>
     <a class="back" href="/">&larr; Back to student portal</a>
   </div>
