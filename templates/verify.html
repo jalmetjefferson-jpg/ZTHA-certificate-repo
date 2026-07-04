@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Verify a ZTHA Certificate</title>
 <style>
   :root { --green: #153B2E; --green-dark: #0d271e; --gold: #F2AF19; --cream: #FBF7EF; --line: #e4ddd0; }
   * { box-sizing: border-box; margin: 0; }
+  html { -webkit-text-size-adjust: 100%; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--cream); color: #2b2b2b;
     min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
   header { background: var(--green); color: #fff; padding: 14px 28px; width: 100%;
     display: flex; align-items: center; gap: 14px; }
-  header .logo-chip { background: #fff; border-radius: 8px; padding: 5px 10px; display: flex; align-items: center; }
+  header .logo-chip { background: #fff; border-radius: 8px; padding: 5px 10px; display: flex; align-items: center; flex: none; }
   header .logo-chip img { height: 22px; display: block; }
   header h1 { font-size: 17px; font-weight: 600; }
   main { max-width: 460px; width: 100%; padding: 40px 20px; }
@@ -18,11 +20,11 @@
   h2 { font-size: 18px; color: var(--green); margin-bottom: 6px; }
   p.sub { font-size: 13px; color: #777; margin-bottom: 20px; }
   label { display: block; font-size: 12px; font-weight: 600; margin: 14px 0 5px; color: #555; }
-  input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px;
-    font-size: 14px; font-family: Consolas, monospace; text-transform: uppercase; background: #fffdf9; }
+  input { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 16px; font-family: Consolas, monospace; text-transform: uppercase; background: #fffdf9; }
   input:focus { outline: 2px solid var(--gold); border-color: transparent; }
-  button { width: 100%; margin-top: 18px; border: 0; border-radius: 8px; padding: 12px;
-    background: var(--green); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+  button { width: 100%; margin-top: 18px; border: 0; border-radius: 8px; padding: 14px 12px;
+    background: var(--green); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
   button:hover { background: var(--green-dark); }
   button:disabled { background: #9db3aa; }
   .result { margin-top: 20px; padding: 16px; border-radius: 10px; font-size: 14px; display: none; }
@@ -35,6 +37,13 @@
   .result dt { color: #666; }
   .result dt::after { content: ":"; }
   footer { font-size: 12px; color: #999; margin-top: 22px; text-align: center; }
+  @media (max-width: 480px) {
+    header { padding: 12px 16px; }
+    main { padding: 24px 14px; }
+    .card { padding: 20px 18px; }
+    .result dl { grid-template-columns: 1fr; gap: 2px 0; }
+    .result dl dt { margin-top: 6px; }
+  }
 </style>
 </head>
 <body>

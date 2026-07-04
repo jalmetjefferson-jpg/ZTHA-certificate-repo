@@ -96,6 +96,17 @@ CONFIG = {
     "qr_dark":        (17, 17, 17),  # module color
     "qr_light":       (255, 255, 255),
 
+    # ---- QR caption (replaces the template's baked-in "SCAN TO ACCESS ZTHA
+    # ALUMNI PLATFORM / alumni.ztha.academy" text, which no longer matches what
+    # the QR actually does — it now links straight to the verify page) --------
+    "qr_caption_title":       "SCAN TO VERIFY",
+    "qr_caption_subtitle":    "Confirms authenticity instantly",
+    "qr_caption_pos":         (1110, 826),   # (left x, baseline y)
+    "qr_caption_subtitle_pos": (1110, 852),
+    "qr_caption_title_size":  20,
+    "qr_caption_subtitle_size": 15,
+    "qr_caption_color":       (34, 34, 34),
+
     # ---- verification code caption (clean gap between QR box and footer) -----
     "verify_code_pos":   (1029, 924),   # (center x, baseline y)
     "verify_code_font_size": 15,
@@ -107,6 +118,7 @@ CONFIG = {
         (448, 694, 605, 726),              # {{ISSUE_DATE}}
         (754, 694, 862, 726),              # {{BATCH}} bottom row
         (1011, 694, 1206, 726),            # {{CERTIFICATE_ID}}
+        (1095, 775, 1300, 898),            # old "SCAN TO ACCESS ZTHA ALUMNI PLATFORM" caption
     ],
     "cream_sample": (350, 470),            # where to sample the cream color
     "erase_ribbon": [                      # per-row green fill (band has a gradient)
@@ -275,8 +287,10 @@ def make_qr(url, cfg):
 
 _SCALED_SCALAR_KEYS = ["name_center_x", "name_center_y", "name_max_width", "name_font_size",
                       "name_min_size", "ribbon_center_x", "ribbon_batch_y", "ribbon_font_size",
-                      "info_font_size", "qr_size", "verify_code_font_size"]
-_SCALED_TUPLE_KEYS = ["qr_box_center", "verify_code_pos", "issue_date_pos", "batch_pos", "cert_id_pos"]
+                      "info_font_size", "qr_size", "verify_code_font_size",
+                      "qr_caption_title_size", "qr_caption_subtitle_size"]
+_SCALED_TUPLE_KEYS = ["qr_box_center", "verify_code_pos", "issue_date_pos", "batch_pos", "cert_id_pos",
+                      "qr_caption_pos", "qr_caption_subtitle_pos"]
 
 
 def scaled_cfg(cfg, scale):
@@ -308,6 +322,8 @@ def build_assets(cfg, scale=1):
         "info_font": load_font(cfg["font_sans"], cfg["info_font_size"]),
         "verify_font": load_font(cfg["font_sans"], cfg["verify_code_font_size"]),
         "ribbon_font": load_font(cfg["font_serif"], cfg["ribbon_font_size"], cfg["ribbon_weight"]),
+        "qr_caption_font": load_font(cfg["font_sans"], cfg["qr_caption_title_size"]),
+        "qr_caption_sub_font": load_font(cfg["font_sans"], cfg["qr_caption_subtitle_size"]),
     }
 
 
@@ -349,6 +365,13 @@ def render_one(name, cert_id, cfg, assets):
     vx, vy = cfg["verify_code_pos"]
     draw.text((vx, vy), f"Verify: {code}", font=assets["verify_font"],
               fill=cfg["verify_code_color"], anchor="ms")
+
+    tx, ty = cfg["qr_caption_pos"]
+    draw.text((tx, ty), cfg["qr_caption_title"], font=assets["qr_caption_font"],
+              fill=cfg["qr_caption_color"], anchor="ls")
+    sx, sy = cfg["qr_caption_subtitle_pos"]
+    draw.text((sx, sy), cfg["qr_caption_subtitle"], font=assets["qr_caption_sub_font"],
+              fill=cfg["ribbon_color"], anchor="ls")
     return im, code
 
 

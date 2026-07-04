@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ZTHA Certificate Generator — Admin</title>
 <style>
   :root {
@@ -9,15 +10,16 @@
     --cream: #FBF7EF; --line: #e4ddd0; --ink: #2b2b2b;
   }
   * { box-sizing: border-box; margin: 0; }
+  html { -webkit-text-size-adjust: 100%; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--cream); color: var(--ink); }
   header {
     background: var(--green); color: #fff; padding: 14px 28px;
-    display: flex; align-items: center; gap: 14px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap; row-gap: 8px;
   }
-  header .logo-chip { background: #fff; border-radius: 8px; padding: 5px 10px; display: flex; align-items: center; }
+  header .logo-chip { background: #fff; border-radius: 8px; padding: 5px 10px; display: flex; align-items: center; flex: none; }
   header .logo-chip img { height: 22px; display: block; }
   header h1 { font-size: 17px; font-weight: 600; letter-spacing: .5px; }
-  header .links { margin-left: auto; display: flex; gap: 16px; }
+  header .links { margin-left: auto; display: flex; gap: 16px; flex-wrap: wrap; }
   header .links a { color: #fff; opacity: .85; font-size: 13px; text-decoration: none; }
   header .links a:hover { opacity: 1; text-decoration: underline; }
   main { display: grid; grid-template-columns: 380px 1fr; gap: 22px; padding: 22px 28px; max-width: 1500px; margin: 0 auto; }
@@ -25,8 +27,8 @@
   .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--green); margin-bottom: 14px; }
   label { display: block; font-size: 12px; font-weight: 600; margin: 10px 0 4px; color: #555; }
   input[type=text], input[type=number] {
-    width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px;
-    font-size: 14px; background: #fffdf9;
+    width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 7px;
+    font-size: 16px; background: #fffdf9;
   }
   input:focus { outline: 2px solid var(--gold); border-color: transparent; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -61,19 +63,33 @@
   .preview-head h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--green); margin-right: auto; }
   select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; font-size: 13px; background: #fffdf9; max-width: 260px; }
   .results { margin-top: 16px; }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .results table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .results th { text-align: left; color: var(--green); font-size: 11px; text-transform: uppercase;
-    letter-spacing: 1px; padding: 6px 8px; border-bottom: 2px solid var(--line); }
-  .results td { padding: 6px 8px; border-bottom: 1px solid #f2ede2; }
+    letter-spacing: 1px; padding: 6px 8px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+  .results td { padding: 6px 8px; border-bottom: 1px solid #f2ede2; white-space: nowrap; }
   .results a { color: var(--green); }
   .status { font-size: 13px; margin-top: 10px; color: #666; min-height: 18px; }
   .ok { color: #1c7a44; font-weight: 600; }
   .err { color: #b54040; font-weight: 600; }
   .muted { color: #999; font-size: 12px; margin-top: 6px; }
-  .dl-row { display: flex; gap: 10px; margin-top: 12px; }
+  .dl-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .dl-row button { flex: 1; min-width: 140px; }
   details { margin-top: 12px; }
   summary { cursor: pointer; font-size: 12.5px; color: var(--green); font-weight: 600; }
   @media (max-width: 900px) { main { grid-template-columns: 1fr; } .preview-wrap { position: static; } }
+  @media (max-width: 480px) {
+    header { padding: 12px 16px; }
+    header h1 { font-size: 15px; width: 100%; order: 1; }
+    header .links { order: 2; gap: 12px; font-size: 12px; }
+    main { padding: 16px; gap: 16px; }
+    .card { padding: 16px; }
+    .row2, .row3 { grid-template-columns: 1fr; }
+    button { padding: 13px 16px; font-size: 15px; }
+    select { max-width: 100%; }
+    .students div { flex-wrap: wrap; }
+    .students .cid { margin-left: 34px; }
+  }
 </style>
 </head>
 <body>
@@ -155,10 +171,12 @@
     </div>
     <div class="results card" id="results" style="display:none">
       <h2>Generated</h2>
-      <table>
-        <thead><tr><th>#</th><th>Name</th><th>Certificate ID</th><th>Verify code</th><th>File</th><th>Print file</th></tr></thead>
-        <tbody id="logbody"></tbody>
-      </table>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Certificate ID</th><th>Verify code</th><th>File</th><th>Print file</th></tr></thead>
+          <tbody id="logbody"></tbody>
+        </table>
+      </div>
     </div>
   </section>
 </main>
