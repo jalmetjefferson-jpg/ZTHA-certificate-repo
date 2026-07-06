@@ -49,10 +49,13 @@ else:
     ADMIN_PASSWORD = get_or_create(ADMIN_PASSWORD_FILE, lambda: secrets.token_urlsafe(9))
     print(f"\n  Admin password (also saved in {ADMIN_PASSWORD_FILE}): {ADMIN_PASSWORD}\n")
 
-# settings the UI is allowed to override (certificate IDs come from the CSV)
+# Settings the UI is allowed to override (certificate IDs come from the CSV).
+# Deliberately ONLY batch metadata — layout coordinates live in the code's
+# CONFIG (calibrated to the template), and the QR/verify domain is always
+# derived from the request host. Both used to be overridable here, and stale
+# saved values broke name placement and pointed QR codes at the wrong site.
 UI_FIELDS = {
-    "batch": str, "year": str, "issue_date": str, "verify_base_url": str,
-    "name_font_size": int, "name_max_width": int, "name_center_y": int,
+    "batch": str, "year": str, "issue_date": str,
 }
 
 
@@ -67,9 +70,8 @@ def require_admin(f):
 
 def current_cfg(overrides=None, host_url=None):
     """host_url: the base URL this request actually came in on (request.host_url).
-    Used as the default verify_base_url so QR codes / verification links always
-    point at wherever the app is currently being reached from (localhost, a
-    tunnel, or a real domain) unless the user explicitly pins one."""
+    The QR / verify links always use it, so certificates generated on
+    certificate.ztha.academy point there, and local runs point at localhost."""
     cfg = dict(engine.CONFIG)
     saved = {}
     if os.path.exists(SETTINGS_FILE):
@@ -86,8 +88,7 @@ def current_cfg(overrides=None, host_url=None):
                     cfg[k] = cast(overrides[k])
                 except (TypeError, ValueError):
                     pass
-    explicit = (overrides or {}).get("verify_base_url", "") or saved.get("verify_base_url", "")
-    if not str(explicit).strip() and host_url:
+    if host_url:
         cfg["verify_base_url"] = host_url.rstrip("/")
     return cfg
 

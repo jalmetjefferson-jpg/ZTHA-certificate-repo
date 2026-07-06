@@ -153,17 +153,7 @@
       </div>
       <label>Issue date (exactly as it should print)</label>
       <input type="text" id="issue_date">
-      <label>Public link (used by the QR code + verification codes)</label>
-      <input type="text" id="verify_base_url" placeholder="leave blank to auto-use this browser's address">
-      <div class="muted">Blank = auto-detects the address you're viewing this page from right now (works for both localhost and a shared/tunnel link). Only set this if you're deploying to a fixed domain later.</div>
-      <details>
-        <summary>Fine-tune name placement</summary>
-        <div class="row3">
-          <div><label>Max font size</label><input type="number" id="name_font_size"></div>
-          <div><label>Max width px</label><input type="number" id="name_max_width"></div>
-          <div><label>Center Y px</label><input type="number" id="name_center_y"></div>
-        </div>
-      </details>
+      <div class="muted">QR codes and verification links automatically use this site's address (the domain you're viewing this page on).</div>
     </div>
 
     <div class="card">
@@ -208,7 +198,7 @@
 </main>
 
 <script>
-const F = ["batch","year","issue_date","verify_base_url","name_font_size","name_max_width","name_center_y"];
+const F = ["batch","year","issue_date"];
 const $ = id => document.getElementById(id);
 let STUDENTS = [];
 

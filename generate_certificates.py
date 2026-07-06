@@ -98,17 +98,11 @@ CONFIG = {
     "qr_dark":        (17, 17, 17),  # module color
     "qr_light":       (255, 255, 255),
 
-    # ---- QR caption ------------------------------------------------------
-    # "SCAN TO / VERIFY CERTIFICATES" is baked into the template art now; we
-    # only draw the domain (dynamically, from verify_base_url, so it can never
-    # go stale like the old baked-in "alumni.ztha.academy" text did) plus the
-    # per-certificate verification code, both left-aligned under that heading.
-    "qr_domain_pos":       (905, 741),   # (left x, baseline y)
-    "qr_domain_font_size": 15,
-    "qr_domain_color":     (242, 175, 25),   # gold #F2AF19, matches the template's caption gold
-
-    "verify_code_pos":       (905, 768),   # (left x, baseline y)
-    "verify_code_font_size": 14,
+    # ---- verification code, under the baked-in "SCAN TO VERIFY CERTIFICATES"
+    # heading (left-aligned with it). That section shows exactly two things:
+    # the QR code and this code.
+    "verify_code_pos":       (925, 744),   # (left x, baseline y)
+    "verify_code_font_size": 15,
     "verify_code_color":     (110, 110, 110),
 
     # ---- erase boxes used by --make-blank -------------------------------------
@@ -290,9 +284,8 @@ def make_qr(url, cfg):
 
 _SCALED_SCALAR_KEYS = ["name_center_x", "name_center_y", "name_max_width", "name_font_size",
                       "name_min_size", "ribbon_center_x", "ribbon_batch_y", "ribbon_font_size",
-                      "info_font_size", "qr_size", "verify_code_font_size", "qr_domain_font_size"]
-_SCALED_TUPLE_KEYS = ["qr_box_center", "verify_code_pos", "issue_date_pos", "batch_pos", "cert_id_pos",
-                      "qr_domain_pos"]
+                      "info_font_size", "qr_size", "verify_code_font_size"]
+_SCALED_TUPLE_KEYS = ["qr_box_center", "verify_code_pos", "issue_date_pos", "batch_pos", "cert_id_pos"]
 
 
 def scaled_cfg(cfg, scale):
@@ -324,15 +317,7 @@ def build_assets(cfg, scale=1):
         "info_font": load_font(cfg["font_sans"], cfg["info_font_size"]),
         "verify_font": load_font(cfg["font_sans"], cfg["verify_code_font_size"]),
         "ribbon_font": load_font(cfg["font_serif"], cfg["ribbon_font_size"], cfg["ribbon_weight"]),
-        "domain_font": load_font(cfg["font_sans"], cfg["qr_domain_font_size"]),
     }
-
-
-def display_domain(cfg):
-    """The domain shown under the QR code — always derived from verify_base_url,
-    so it can never drift out of sync with where the QR actually points (the
-    old baked-in template text did exactly that when the domain changed)."""
-    return re.sub(r"^https?://", "", cfg["verify_base_url"]).rstrip("/")
 
 
 def render_one(name, cert_id, cfg, assets):
@@ -369,10 +354,6 @@ def render_one(name, cert_id, cfg, assets):
     qr_img = make_qr(verify_url(cert_id, code, cfg), cfg)
     cx, cy = cfg["qr_box_center"]
     im.paste(qr_img, (cx - qr_img.width // 2, cy - qr_img.height // 2))
-
-    dx, dy = cfg["qr_domain_pos"]
-    draw.text((dx, dy), display_domain(cfg), font=assets["domain_font"],
-              fill=cfg["qr_domain_color"], anchor="ls")
 
     vx, vy = cfg["verify_code_pos"]
     draw.text((vx, vy), f"Verify: {code}", font=assets["verify_font"],
