@@ -59,61 +59,64 @@ CONFIG = {
     "print_scale": 3,
 
     # ---- student name (center) ----------------------------------------------
-    "name_center_x":   768,     # horizontal center of the page
-    "name_center_y":   449,     # vertical center of the name line
-    "name_max_width":  880,     # auto-shrink until the name fits this width
-    "name_font_size":  62,      # starting size
-    "name_min_size":   26,      # never shrink below this
+    # Calibrated for the 1280x853 template (2026-07 redesign: corner ornaments,
+    # watermark, "CERTIFICATE OF COMPETENCE").
+    "name_center_x":   640,     # horizontal center of the page
+    "name_center_y":   371,     # vertical center of the name line
+    "name_max_width":  720,     # auto-shrink until the name fits this width
+    "name_font_size":  50,      # starting size
+    "name_min_size":   22,      # never shrink below this
     "name_weight":     600,     # Cinzel variable-font weight (400-900)
     "name_tracking":   0.10,    # letter-spacing as a fraction of font size
     "name_color":      (21, 59, 46),     # deep green #153B2E
 
-    # ---- top-left ribbon (band interior x 121-273, centered on x=197) --------
+    # ---- top-left ribbon (interior x 98-228, centered on x=163) --------------
     # The year ("CLASS OF 2026") is baked into the template, so only the batch
     # value is drawn, in the space between the BATCH label and the divider.
-    "ribbon_center_x":    197,
-    "ribbon_batch_y":     130,   # vertical center of the batch line
+    "ribbon_center_x":    163,
+    "ribbon_batch_y":     118,   # vertical center of the batch line
     "ribbon_year_y":      None,  # None = year is part of the template art
-    "ribbon_font_size":   36,
+    "ribbon_font_size":   28,
     "ribbon_weight":      700,
     "ribbon_color":       (242, 175, 25),   # gold #F2AF19
 
-    # ---- bottom info row (values centered on the dashed lines at y≈720) ------
-    "info_font_size":  22,
+    # ---- bottom info row (values sit on the dashed lines at y=600) -----------
+    "info_font_size":  18,
     "info_color":      (45, 45, 45),
-    "issue_date_pos":  (556, 714),   # (center x, baseline y)
-    "batch_pos":       (812, 714),
-    "cert_id_pos":     (1112, 714),
+    "issue_date_pos":  (438, 597),   # (center x, baseline y) — dash 384-492
+    "batch_pos":       (677, 597),   # dash 637-716
+    "cert_id_pos":     (923, 597),   # dash 852-993
     "info_max_width": {              # value auto-shrinks to fit its dashed line
-        "issue_date_pos": 200,       # dash 461-652
-        "batch_pos":      105,       # dash 765-860
-        "cert_id_pos":    185,       # dash 1023-1201
+        "issue_date_pos": 100,
+        "batch_pos":      72,
+        "cert_id_pos":    135,
     },
 
-    # ---- QR code (gold frame (971,773)-(1087,899)) ----------------------------
-    "qr_box_center":  (1029, 836),   # center of the frame interior
-    "qr_size":        96,            # final pasted size in px (snapped to module grid)
+    # ---- QR code (gold frame (809,644)-(905,748)) ----------------------------
+    "qr_box_center":  (857, 696),   # center of the frame interior
+    "qr_size":        84,           # final pasted size in px (snapped to module grid)
     "qr_dark":        (17, 17, 17),  # module color
     "qr_light":       (255, 255, 255),
 
-    # ---- QR caption (replaces the template's baked-in "SCAN TO ACCESS ZTHA
-    # ALUMNI PLATFORM / alumni.ztha.academy" text, which no longer matches what
-    # the QR actually does — it now links straight to the verify page) --------
-    "qr_caption_title":       "SCAN TO VERIFY",
-    "qr_caption_subtitle":    "Confirms authenticity instantly",
-    "qr_caption_pos":         (1110, 826),   # (left x, baseline y)
-    "qr_caption_subtitle_pos": (1110, 852),
-    "qr_caption_title_size":  20,
-    "qr_caption_subtitle_size": 15,
-    "qr_caption_color":       (34, 34, 34),
+    # ---- QR caption ------------------------------------------------------
+    # "SCAN TO / VERIFY CERTIFICATES" is baked into the template art now; we
+    # only draw the domain (dynamically, from verify_base_url, so it can never
+    # go stale like the old baked-in "alumni.ztha.academy" text did) plus the
+    # per-certificate verification code, both left-aligned under that heading.
+    "qr_domain_pos":       (905, 741),   # (left x, baseline y)
+    "qr_domain_font_size": 15,
+    "qr_domain_color":     (242, 175, 25),   # gold #F2AF19, matches the template's caption gold
 
-    # ---- verification code caption (clean gap between QR box and footer) -----
-    "verify_code_pos":   (1029, 924),   # (center x, baseline y)
-    "verify_code_font_size": 15,
-    "verify_code_color": (110, 110, 110),
+    "verify_code_pos":       (905, 768),   # (left x, baseline y)
+    "verify_code_font_size": 14,
+    "verify_code_color":     (110, 110, 110),
 
-    # ---- erase boxes used by --make-blank (left, top, right, bottom) ---------
-    "erase_cream": [                       # flat-filled with sampled cream
+    # ---- erase boxes used by --make-blank -------------------------------------
+    # NOTE: --make-blank regenerates template_blank.png from template.png (the
+    # placeholder version). The current template_blank.png was hand-authored
+    # directly (no {{PLACEHOLDER}} markers), so these boxes are unused unless
+    # template.png is updated to match and --make-blank is run again.
+    "erase_cream": [
         (350, 406, 1192, 494),             # {{STUDENT_NAME}}
         (448, 694, 605, 726),              # {{ISSUE_DATE}}
         (754, 694, 862, 726),              # {{BATCH}} bottom row
@@ -287,10 +290,9 @@ def make_qr(url, cfg):
 
 _SCALED_SCALAR_KEYS = ["name_center_x", "name_center_y", "name_max_width", "name_font_size",
                       "name_min_size", "ribbon_center_x", "ribbon_batch_y", "ribbon_font_size",
-                      "info_font_size", "qr_size", "verify_code_font_size",
-                      "qr_caption_title_size", "qr_caption_subtitle_size"]
+                      "info_font_size", "qr_size", "verify_code_font_size", "qr_domain_font_size"]
 _SCALED_TUPLE_KEYS = ["qr_box_center", "verify_code_pos", "issue_date_pos", "batch_pos", "cert_id_pos",
-                      "qr_caption_pos", "qr_caption_subtitle_pos"]
+                      "qr_domain_pos"]
 
 
 def scaled_cfg(cfg, scale):
@@ -322,9 +324,15 @@ def build_assets(cfg, scale=1):
         "info_font": load_font(cfg["font_sans"], cfg["info_font_size"]),
         "verify_font": load_font(cfg["font_sans"], cfg["verify_code_font_size"]),
         "ribbon_font": load_font(cfg["font_serif"], cfg["ribbon_font_size"], cfg["ribbon_weight"]),
-        "qr_caption_font": load_font(cfg["font_sans"], cfg["qr_caption_title_size"]),
-        "qr_caption_sub_font": load_font(cfg["font_sans"], cfg["qr_caption_subtitle_size"]),
+        "domain_font": load_font(cfg["font_sans"], cfg["qr_domain_font_size"]),
     }
+
+
+def display_domain(cfg):
+    """The domain shown under the QR code — always derived from verify_base_url,
+    so it can never drift out of sync with where the QR actually points (the
+    old baked-in template text did exactly that when the domain changed)."""
+    return re.sub(r"^https?://", "", cfg["verify_base_url"]).rstrip("/")
 
 
 def render_one(name, cert_id, cfg, assets):
@@ -362,16 +370,13 @@ def render_one(name, cert_id, cfg, assets):
     cx, cy = cfg["qr_box_center"]
     im.paste(qr_img, (cx - qr_img.width // 2, cy - qr_img.height // 2))
 
+    dx, dy = cfg["qr_domain_pos"]
+    draw.text((dx, dy), display_domain(cfg), font=assets["domain_font"],
+              fill=cfg["qr_domain_color"], anchor="ls")
+
     vx, vy = cfg["verify_code_pos"]
     draw.text((vx, vy), f"Verify: {code}", font=assets["verify_font"],
-              fill=cfg["verify_code_color"], anchor="ms")
-
-    tx, ty = cfg["qr_caption_pos"]
-    draw.text((tx, ty), cfg["qr_caption_title"], font=assets["qr_caption_font"],
-              fill=cfg["qr_caption_color"], anchor="ls")
-    sx, sy = cfg["qr_caption_subtitle_pos"]
-    draw.text((sx, sy), cfg["qr_caption_subtitle"], font=assets["qr_caption_sub_font"],
-              fill=cfg["ribbon_color"], anchor="ls")
+              fill=cfg["verify_code_color"], anchor="ls")
     return im, code
 
 
