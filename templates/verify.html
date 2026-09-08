@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Verify a ZTHA Certificate</title>
-<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
-<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -98,7 +98,7 @@
 </head>
 <body>
 <header>
-  <span class="logo-chip"><img src="/static/ztha_logo.png" alt="ZTHA Academy"></span>
+  <span class="logo-chip"><img src="{{ url_for('static', filename='ztha_logo.png') }}" alt="ZTHA Academy"></span>
   <h1>Certificate Verification</h1>
 </header>
 <main>
@@ -118,6 +118,8 @@
   <footer>Every ZTHA Academy certificate carries a code that is cryptographically tied to its ID and recipient — it cannot be produced without the Academy's private signing key.</footer>
 </main>
 <script>
+const BASE = {{ request.script_root|tojson }};
+const api = path => BASE + path;
 const $ = id => document.getElementById(id);
 function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -135,7 +137,7 @@ async function check() {
   if (!id || !code) return;
   $("go").disabled = true;
   try {
-    const r = await fetch("/api/verify?" + new URLSearchParams({ id, code }));
+    const r = await fetch(api("/api/verify") + "?" + new URLSearchParams({ id, code }));
     const j = await r.json();
     box.className = "result show " + (j.valid ? "valid" : "invalid");
     box.innerHTML = j.valid
