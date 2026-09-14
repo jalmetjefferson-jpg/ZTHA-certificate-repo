@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ZTHA Certificate Generator — Admin</title>
-<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
-<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -42,12 +42,14 @@
   .card h2 { font-family: var(--font-display); font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px;
     color: var(--green); margin-bottom: 14px; }
   label { display: block; font-size: 12px; font-weight: 600; margin: 10px 0 5px; color: #6b6459; }
-  input[type=text], input[type=number] {
+  input[type=text], input[type=number], textarea, input[type=color] {
     width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 8px;
     font-size: 16px; font-family: var(--font-body); background: #fff; color: var(--ink);
     transition: border-color .15s, box-shadow .15s;
   }
-  input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(242,175,25,.16); }
+  textarea { min-height: 130px; resize: vertical; font-size: 13px; line-height: 1.45; }
+  input[type=color] { min-height: 44px; padding: 4px; }
+  input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(242,175,25,.16); }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   .drop {
@@ -120,12 +122,12 @@
 </head>
 <body>
 <header>
-  <span class="logo-chip"><img src="/static/ztha_logo.png" alt="ZTHA Academy"></span>
+  <span class="logo-chip"><img src="{{ url_for('static', filename='ztha_logo.png') }}" alt="ZTHA Academy"></span>
   <h1>Certificate Generator — Admin</h1>
   <span class="links">
-    <a href="/" target="_blank">Student portal &rarr;</a>
-    <a href="/verify" target="_blank">Verify certificate &rarr;</a>
-    <a href="/admin/logout">Log out</a>
+    <a href="{{ url_for('portal') }}" target="_blank">Student portal &rarr;</a>
+    <a href="{{ url_for('verify_page') }}" target="_blank">Verify certificate &rarr;</a>
+    <a href="{{ url_for('admin_logout') }}">Log out</a>
   </span>
 </header>
 
@@ -133,36 +135,89 @@
   <!-- LEFT: controls -->
   <section>
     <div class="card">
-      <h2>1 &middot; Students CSV</h2>
+      <h2>1 &middot; Graduates</h2>
       <div class="drop" id="drop">
         <b>Click to choose</b> or drag your CSV here<br>
-        <span class="muted">three columns: student name, email, certificate ID</span>
+        <span class="muted">columns: student name, email, optional certificate ID</span>
         <input type="file" id="file" accept=".csv" hidden>
       </div>
-      <div class="muted">The email column is required — it's how students find their certificate on the portal.</div>
+      <label>Or paste graduate list</label>
+      <textarea id="graduatesPaste" placeholder="Ozioma Joseph, princessjok2018@gmail.com&#10;Emmanuel Eze, eeze14689@gmail.com"></textarea>
+      <button class="btn-ghost" id="pasteBtn" style="margin-top:10px">Load pasted graduates</button>
+      <div class="muted">Use this every batch: paste graduates or upload CSV. Certificate IDs can be filled manually or auto-generated from the batch settings.</div>
       <div id="csvinfo" class="muted">Loading&hellip;</div>
       <div class="students" id="students" style="display:none"></div>
       <div class="skips" id="skips" style="display:none"></div>
     </div>
 
     <div class="card">
-      <h2>2 &middot; Batch details (entered manually)</h2>
+      <h2>2 &middot; Batch details</h2>
       <div class="row2">
         <div><label>Batch</label><input type="text" id="batch"></div>
         <div><label>Year</label><input type="text" id="year"></div>
       </div>
       <label>Issue date (exactly as it should print)</label>
       <input type="text" id="issue_date">
-      <div class="muted">QR codes and verification links automatically use this site's address (the domain you're viewing this page on).</div>
+      <div class="row2">
+        <div><label>ID prefix</label><input type="text" id="id_prefix"></div>
+        <div><label>Starting ID number</label><input type="number" id="id_start"></div>
+      </div>
+      <div class="muted">QR codes and verification links automatically use this site's address.</div>
     </div>
 
     <div class="card">
-      <h2>3 &middot; Generate</h2>
+      <h2>3 &middot; Certificate editor</h2>
+      <label>Upload certificate template image</label>
+      <input type="file" id="templateFile" accept="image/png,image/jpeg">
+      <button class="btn-ghost" id="templateBtn" style="margin-top:10px">Upload template</button>
+      <div class="muted">Replace the background/template to change any baked-in certificate text or design. Use the fields below to move the dynamic parts.</div>
+      <details>
+        <summary>Advanced layout, fonts, colors</summary>
+        <div class="row3">
+          <div><label>Name center X</label><input type="number" id="name_center_x"></div>
+          <div><label>Name center Y</label><input type="number" id="name_center_y"></div>
+          <div><label>Name max width</label><input type="number" id="name_max_width"></div>
+        </div>
+        <div class="row3">
+          <div><label>Name font size</label><input type="number" id="name_font_size"></div>
+          <div><label>Name min size</label><input type="number" id="name_min_size"></div>
+          <div><label>Name color</label><input type="color" id="name_color"></div>
+        </div>
+        <div class="row3">
+          <div><label>Ribbon X</label><input type="number" id="ribbon_center_x"></div>
+          <div><label>Ribbon Y</label><input type="number" id="ribbon_batch_y"></div>
+          <div><label>Ribbon font size</label><input type="number" id="ribbon_font_size"></div>
+        </div>
+        <div class="row3">
+          <div><label>Ribbon color</label><input type="color" id="ribbon_color"></div>
+          <div><label>Info font size</label><input type="number" id="info_font_size"></div>
+          <div><label>Info color</label><input type="color" id="info_color"></div>
+        </div>
+        <div class="row3">
+          <div><label>Issue date pos</label><input type="text" id="issue_date_pos"></div>
+          <div><label>Batch pos</label><input type="text" id="batch_pos"></div>
+          <div><label>Cert ID pos</label><input type="text" id="cert_id_pos"></div>
+        </div>
+        <div class="row3">
+          <div><label>QR center</label><input type="text" id="qr_box_center"></div>
+          <div><label>QR size</label><input type="number" id="qr_size"></div>
+          <div><label>Print scale</label><input type="number" id="print_scale"></div>
+        </div>
+        <div class="row2">
+          <div><label>Verify code pos</label><input type="text" id="verify_code_pos"></div>
+          <div><label>Verify code color</label><input type="color" id="verify_code_color"></div>
+        </div>
+        <div><label>Verify code font size</label><input type="number" id="verify_code_font_size"></div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>4 &middot; Generate</h2>
       <button class="btn-primary" id="go" disabled>Generate all certificates</button>
       <div class="status" id="status"></div>
       <div class="dl-row" id="dls" style="display:none">
-        <button class="btn-gold" onclick="location='/admin/download-zip'">Download ZIP</button>
-        <button class="btn-ghost" onclick="location='/admin/log.csv'">Download log CSV</button>
+        <button class="btn-gold" onclick="location=api('/admin/download-zip')">Download ZIP</button>
+        <button class="btn-ghost" onclick="location=api('/admin/log.csv')">Download log CSV</button>
       </div>
     </div>
 
@@ -198,8 +253,10 @@
 </main>
 
 <script>
-const F = ["batch","year","issue_date"];
+const BASE = {{ request.script_root|tojson }};
+const F = ["batch","year","issue_date","id_prefix","id_start","print_scale","name_center_x","name_center_y","name_max_width","name_font_size","name_min_size","ribbon_center_x","ribbon_batch_y","ribbon_font_size","info_font_size","verify_code_font_size","qr_size","issue_date_pos","batch_pos","cert_id_pos","qr_box_center","verify_code_pos","name_color","ribbon_color","info_color","verify_code_color"];
 const $ = id => document.getElementById(id);
+const api = path => BASE + path;
 let STUDENTS = [];
 
 function settings() {
@@ -246,7 +303,7 @@ function refreshPreview() {
       p.set("preview_name", STUDENTS[idx].name);
       if (STUDENTS[idx].cert_id) p.set("preview_cert_id", STUDENTS[idx].cert_id);
     }
-    $("pv").src = "/admin/preview?" + p.toString() + "&_=" + Date.now();
+    $("pv").src = api("/admin/preview") + "?" + p.toString() + "&_=" + Date.now();
   }, 400);
 }
 F.forEach(k => $(k).addEventListener("input", refreshPreview));
@@ -255,7 +312,7 @@ $("refresh").addEventListener("click", refreshPreview);
 
 // ---- state loading (initial load + after a reset) ----
 async function loadState() {
-  const r = await fetch("/admin/state");
+  const r = await fetch(api("/admin/state"));
   const j = await r.json();
   F.forEach(k => { if (j.settings[k] !== undefined) $(k).value = j.settings[k]; });
   $("csvinfo").innerHTML = j.csv_error ? '<span class="err">' + esc(j.csv_error) + '</span>' : "";
@@ -276,7 +333,7 @@ async function sendCSV(f) {
   const fd = new FormData();
   fd.append("csv", f);
   $("csvinfo").textContent = "Uploading " + f.name + "…";
-  const r = await fetch("/admin/upload", { method: "POST", body: fd });
+  const r = await fetch(api("/admin/upload"), { method: "POST", body: fd });
   const j = await r.json();
   if (!r.ok) { $("csvinfo").innerHTML = '<span class="err">' + esc(j.error) + '</span>'; return; }
   showStudents(j.students, j.skipped);
@@ -284,13 +341,47 @@ async function sendCSV(f) {
   refreshPreview();
 }
 
+
+// ---- paste graduate list ----
+$("pasteBtn").addEventListener("click", async () => {
+  const graduates = $("graduatesPaste").value.trim();
+  $("csvinfo").textContent = "Loading pasted graduates…";
+  const r = await fetch(api("/admin/paste-graduates"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ graduates })
+  });
+  const j = await r.json();
+  if (!r.ok) {
+    $("csvinfo").innerHTML = '<span class="err">' + esc(j.error || "Could not load graduates") + '</span>';
+    if (j.skipped) showStudents([], j.skipped);
+    return;
+  }
+  showStudents(j.students, j.skipped);
+  refreshPreview();
+});
+
+// ---- template upload ----
+$("templateBtn").addEventListener("click", async () => {
+  const f = $("templateFile").files[0];
+  if (!f) { alert("Choose a PNG or JPG template first."); return; }
+  const fd = new FormData();
+  fd.append("template", f);
+  $("status").textContent = "Uploading template…";
+  const r = await fetch(api("/admin/upload-template"), { method: "POST", body: fd });
+  const j = await r.json();
+  if (!r.ok) { $("status").innerHTML = '<span class="err">' + esc(j.error) + '</span>'; return; }
+  $("status").innerHTML = '<span class="ok">Template uploaded. Refreshing preview…</span>';
+  refreshPreview();
+});
+
 // ---- generate ----
 $("go").addEventListener("click", async () => {
   const btn = $("go");
   btn.disabled = true;
   $("status").textContent = "Rendering… this can take a moment for large batches.";
   try {
-    const r = await fetch("/admin/generate", {
+    const r = await fetch(api("/admin/generate"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(settings()),
@@ -303,8 +394,8 @@ $("go").addEventListener("click", async () => {
     $("logbody").innerHTML = j.log.map((row, i) =>
       `<tr><td>${i+1}</td><td>${esc(row.full_name)}</td><td>${esc(row.certificate_id)}</td>
        <td>${esc(row.verification_code)}</td>
-       <td><a href="/certificates/${encodeURIComponent(row.filename)}" target="_blank">view</a></td>
-       <td>${row.print_filename ? `<a href="/certificates/${encodeURIComponent(row.print_filename)}" target="_blank">view</a>` : "—"}</td></tr>`).join("");
+       <td><a href="${api('/certificates/')}${encodeURIComponent(row.filename)}" target="_blank">view</a></td>
+       <td>${row.print_filename ? `<a href="${api('/certificates/')}${encodeURIComponent(row.print_filename)}" target="_blank">view</a>` : "—"}</td></tr>`).join("");
     $("results").style.display = "";
   } finally { btn.disabled = false; }
 });
@@ -322,7 +413,7 @@ $("resetBtn").addEventListener("click", async () => {
   btn.disabled = true;
   $("resetStatus").textContent = "Resetting…";
   try {
-    const r = await fetch("/admin/reset", { method: "POST" });
+    const r = await fetch(api("/admin/reset"), { method: "POST" });
     const j = await r.json();
     $("resetStatus").innerHTML = '<span class="ok">Cleared ' + j.records_cleared +
       ' record(s) and ' + j.files_removed + ' file(s).</span>' +

@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Get Your Certificate — ZTHA Academy</title>
-<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
-<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -125,9 +125,9 @@
 </head>
 <body>
 <header>
-  <span class="logo-chip"><img src="/static/ztha_logo.png" alt="ZTHA Academy"></span>
+  <span class="logo-chip"><img src="{{ url_for('static', filename='ztha_logo.png') }}" alt="ZTHA Academy"></span>
   <h1>Certificate Portal</h1>
-  <a href="/verify" target="_blank">Verify certificate &rarr;</a>
+  <a href="{{ url_for('verify_page') }}" target="_blank">Verify certificate &rarr;</a>
 </header>
 <main>
   <div class="hero">
@@ -178,6 +178,8 @@
 </footer>
 
 <script>
+const BASE = {{ request.script_root|tojson }};
+const api = path => BASE + path;
 const $ = id => document.getElementById(id);
 function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -199,7 +201,7 @@ async function search() {
   $("go").disabled = true;
   $("loading").classList.add("on");
   try {
-    const r = await fetch("/api/lookup?" + new URLSearchParams({ name, email }));
+    const r = await fetch(api("/api/lookup") + "?" + new URLSearchParams({ name, email }));
     const j = await r.json();
     if (!j.found) {
       $("errorText").textContent = j.reason;
@@ -207,7 +209,7 @@ async function search() {
       return;
     }
     current = j;
-    $("certimg").src = "/certificates/" + encodeURIComponent(j.filename);
+    $("certimg").src = api("/certificates/") + encodeURIComponent(j.filename);
     $("r_name").textContent = j.full_name;
     $("r_id").textContent = j.certificate_id;
     $("r_batch").textContent = j.batch + " · Class of " + j.year;
@@ -228,7 +230,7 @@ $("go").addEventListener("click", search);
 
 function downloadFile(filename) {
   const a = document.createElement("a");
-  a.href = "/certificates/" + encodeURIComponent(filename);
+  a.href = api("/certificates/") + encodeURIComponent(filename);
   a.download = filename;
   document.body.appendChild(a);
   a.click();
@@ -242,7 +244,7 @@ $("verifyBtn").addEventListener("click", async () => {
   const box = $("verifyBox");
   box.className = "verify-box show";
   box.innerHTML = '<span class="badge">&hellip;</span><span>Checking&hellip;</span>';
-  const r = await fetch("/api/verify?" + new URLSearchParams({ id: current.certificate_id, code: current.verification_code }));
+  const r = await fetch(api("/api/verify") + "?" + new URLSearchParams({ id: current.certificate_id, code: current.verification_code }));
   const j = await r.json();
   if (j.valid) {
     box.className = "verify-box valid show";
